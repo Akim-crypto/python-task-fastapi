@@ -27,6 +27,7 @@ class TaskOut(BaseModel):
 
 @app.post("/tasks", response_model=TaskOut, status_code=201)
 def create_task(task: TaskCreate):
+    '''обрабатывает путь tasks создает новую задачу'''
     try:
         return add_task(task.description)
     except ValidationError as e:
@@ -35,6 +36,7 @@ def create_task(task: TaskCreate):
 
 @app.get("/tasks", response_model=List[TaskOut])
 def get_tasks(status: str | None = None):
+    '''вызывает все задачи'''
     try:
         return list_tasks(status)
     except ValidationError as e:
@@ -43,6 +45,7 @@ def get_tasks(status: str | None = None):
 
 @app.get("/tasks/{task_id}", response_model=TaskOut)
 def get_task(task_id: int):
+    '''вызывает определенную задачу'''
     try:
         tasks = list_tasks()
         for t in tasks:
@@ -55,6 +58,7 @@ def get_task(task_id: int):
 
 @app.put("/tasks/{task_id}", response_model=TaskOut)
 def update_task_endpoint(task_id: int, task: TaskUpdate):
+    '''обновляет описание задачи'''
     try:
         return update_task(task_id, task.description)
     except ValidationError as e:
@@ -65,6 +69,7 @@ def update_task_endpoint(task_id: int, task: TaskUpdate):
 
 @app.delete("/tasks/{task_id}", status_code=204)
 def delete_task_endpoint(task_id: int):
+    '''удаляет задачу'''
     try:
         delete_task(task_id)
     except TaskNotFound as e:

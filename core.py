@@ -18,9 +18,11 @@ class Status(str,Enum):
         return [s.value for s in cls]
     
 def current_time() -> str:
+    '''получаем время при создании задачи'''
     return datetime.now().isoformat(timespec="seconds")
 
 def load_data() -> Dict[str,Any]:
+    '''скачивает данные из json файла'''
     if not os.path.exists(TASK_FILE):
         return {"last_id": 0 , "tasks":[]}
     try:
@@ -32,10 +34,12 @@ def load_data() -> Dict[str,Any]:
         return {"last_id":0 , "tasks":[]}
 
 def save_data(data:Dict[str,Any]) -> None:
+    '''сохраняет данные в файле json'''
     with open(TASK_FILE,"w",encoding="utf-8")as f :
         json.dump(data,f,indent=4,ensure_ascii=False)
 
 def validate_description(description:str) -> str:
+    '''Проверяет текст чтобы не был пустым и очень длинным'''
     description = description.strip()
     if not description:
         raise ValidationError("Description cannot be empty") 
@@ -44,12 +48,14 @@ def validate_description(description:str) -> str:
     return description
 
 def find_task(data:Dict[str,Any], task_id:int) -> Dict[str,Any]:
+    '''находит нужную задачу'''
     for task in data["tasks"]:
         if task["id"] == task_id:
             return task
     raise TaskNotFound(task_id)
 
 def add_task(description:str) -> Dict[str,Any]:
+    '''создает новую задачу'''
     description = validate_description(description)
     data = load_data()
     new_id = data["last_id"] + 1
@@ -69,6 +75,7 @@ def add_task(description:str) -> Dict[str,Any]:
     return task
 
 def update_task(task_id:int , description:str) -> Dict[str,Any]:
+    '''обновляет сущетсвующую задачу'''
     description = validate_description(description)
     data = load_data()
     task = find_task(data,task_id)
@@ -79,6 +86,7 @@ def update_task(task_id:int , description:str) -> Dict[str,Any]:
     return task
 
 def delete_task(task_id:int) -> None:
+    '''удалаяет задачу'''
     data = load_data()
     before = len(data["tasks"])
     data["tasks"] = [t for t in data["tasks"] if t["id"] != task_id]
@@ -90,6 +98,7 @@ def delete_task(task_id:int) -> None:
     save_data()
 
 def change_status(task_id: int, new_status:str) -> Dict[str,Any]:
+    '''меняет статус задачи'''
     if new_status not in Status.values():
         raise ValidationError(
             f"Invalid status '{new_status}'. Valid: {', '.join(Status.values())}"
@@ -105,6 +114,7 @@ def change_status(task_id: int, new_status:str) -> Dict[str,Any]:
 
 
 def list_tasks(status: str | None = None) -> List[Dict[str, Any]]:
+    '''возвращает спискок задач'''
     data = load_data()
     tasks = data["tasks"]
 
